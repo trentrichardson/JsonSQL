@@ -1,5 +1,5 @@
 /*! jQuery-Impromptu - v0.1.0 - 2015-03-18
-* http://trentrichardson.com/JsonSQL
+* http://trentrichardson.com/jsonsql
 * Copyright (c) 2015 Trent Richardson; Licensed MIT */
 
 var jsonsql = {

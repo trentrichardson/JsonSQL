@@ -4,7 +4,7 @@ Query json objects with SQL syntax
 
 Author: Trent Richardson [http://trentrichardson.com]
 
-Documentation: http://trentrichardson.com/JsonSQL/
+Documentation: http://trentrichardson.com/jsonsql/
 
 Version 0.1
 
