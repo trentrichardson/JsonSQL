@@ -158,22 +158,12 @@ var jsonsql = {
 			if(a == b)	return 0;
 			return (a - b);
 		},
-/*
 		'html': function(a,b) {	// HTML Parser
 			var a_text = (/<[a-z][\s\S]*>/i.test(a)) ? $(a).text() : a;
 			var b_text = (/<[a-z][\s\S]*>/i.test(b)) ? $(b).text() : b;
 			if(a_text == b_text)	return 0;
 			return (a_text > b_text) ? 1: -1;
 		},
-*/
+		
 	}
 };
-
-//-------------- Adding Extra Parsers -------------------
-
-sqlarrayselect.parsers['html'] = function(a,b) {	// HTML Parser
-	var a_text = (/<[a-z][\s\S]*>/i.test(a)) ? $(a).text() : a;
-	var b_text = (/<[a-z][\s\S]*>/i.test(b)) ? $(b).text() : b;
-	if(a_text == b_text)	return 0;
-	return (a_text > b_text) ? 1: -1;
-}
