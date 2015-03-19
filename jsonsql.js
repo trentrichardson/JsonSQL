@@ -1,4 +1,4 @@
-/*! jQuery-Impromptu - v0.1.0 - 2015-03-18
+/*! JsonSQL - v0.1.0 - 2015-03-18
 * http://trentrichardson.com/jsonsql
 * Copyright (c) 2015 Trent Richardson; Licensed MIT */
 /* Updates by Richard Rodriguez 2015-03-19
