@@ -1,7 +1,8 @@
 /*! JsonSQL - v0.1.0 - 2015-03-18
 * http://trentrichardson.com/jsonsql
 * Copyright (c) 2015 Trent Richardson; Licensed MIT */
-/* Updates by Richard Rodriguez 2015-03-19
+/*
+Updates by Richard Rodriguez 2015-03-19
 Major changes:
 1) Allows an Array of Objects to be selected, in addition to JSON data
 2) Can re-name labels, just like an AS statement does, using # Hashtag notation
@@ -9,13 +10,19 @@ Example: "Select menu_order#Menu_Order" - is basically the same as saying "menu_
 3) Re-built Order By to make multi-sort possible, and allows non-uniform Objects to not cause "Undefined" data
 4) Plug-in structure for Parsers.  Provided HTML parser as a sample plug-in. (uses JQuery)
 Example:  "order by label.deschtml,menu_order.num,practice" - This uses 3 parsers, HTML in Desc order, then Num, then Standard default.
+
+Updates by Richard Rodriguez 2015-03-22
+1) Changed the ORDER BY separator to #, and allow deep linking in (SELECT,WHERE,ORDER BY)
+The following is a valid SQL if "user" is an object:
+Example:  "select label,user.name,menu_order from data where (user.name=='Bob') order by user.name#desc,menu_order"
+2) Made it possible to use # as a label.  To mimic "SELECT menu_order AS '#' " use: "select menu_order##"
 */
 (function() {
 
 	var jsonsql = {
 
 		query: function(sql,json){
-			var returnfields = sql.match(/^(select)\s+([a-z0-9_#\,\*\']+)\s+from\s+([a-z0-9_\.]+)(?: where\s+\((.+)\))?\s*(?:order\sby\s+([a-z0-9_\,\.]+))?\s*(?:limit\s+([0-9_\,]*))?/i);
+			var returnfields = sql.match(/^(select)\s+([a-z0-9_#\.\,\*\']+)\s+from\s+([a-z0-9_\.]+)(?: where\s+\((.+)\))?\s*(?:order\sby\s+([a-z0-9_#\,\.]+))?\s*(?:limit\s+([0-9_\,]*))?/i);
 			var ops = {
 				fields: returnfields[2].replace(' ','').split(','),
 				from: returnfields[3].replace(' ',''),
@@ -27,10 +34,12 @@ Example:  "order by label.deschtml,menu_order.num,practice" - This uses 3 parser
 
 			if(ops.fields[0] != "*") {
 				for(var i in ops.fields) {
-					fieldParts = ops.fields[i].split("#")	// split apart by # for AS feature
+					fieldParts = ops.fields[i].split("#", 2)	// split apart by # for AS feature
 					if(fieldParts.length == 2) {
-						ops.fieldsAs[fieldParts[0]] = fieldParts[1].replace(/_/g, ' ')
-						ops.fields[i] = fieldParts[0]
+						fieldName = fieldParts[0]
+						fieldsAs = ops.fields[i].substring(ops.fields[i].indexOf('#') +1)
+						ops.fieldsAs[fieldName] = fieldsAs.replace(/_/g, ' ')
+						ops.fields[i] = fieldName
 					}
 				}
 			}
@@ -59,8 +68,10 @@ Example:  "order by label.deschtml,menu_order.num,practice" - This uses 3 parser
 
 			for(var jsonsql_i in jsonsql_scope){
 				with(jsonsql_scope[jsonsql_i]) {
-					if(eval(jsonsql_o.where))
-						jsonsql_result.push(this.returnFields(jsonsql_scope[jsonsql_i],jsonsql_o.fields) )
+					try {
+						if(eval(jsonsql_o.where))
+							jsonsql_result.push(this.returnFields(jsonsql_scope[jsonsql_i],jsonsql_o.fields) )
+					} catch(err) {}
 				}
 			}
 
@@ -75,8 +86,18 @@ Example:  "order by label.deschtml,menu_order.num,practice" - This uses 3 parser
 				return scope;
 
 			var returnobj = {};
-			for(var i in fields)
-				returnobj[fields[i]] = (fields[i] in scope) ? scope[fields[i]] : ""
+			for(var i in fields) {
+				if(fields[i] in scope)
+					returnobj[fields[i]] = scope[fields[i]];
+				else {
+					try {
+						var val = eval("scope."+fields[i])
+						returnobj[fields[i]] = (val) ? val : "";
+					} catch(err) {
+						returnobj[fields[i]] = "";
+					}
+				}
+			}
 			return returnobj;
 		},
 
@@ -85,7 +106,7 @@ Example:  "order by label.deschtml,menu_order.num,practice" - This uses 3 parser
 				return result;
 			var orderlist = new Array();
 			for(var i in orderby) {
-				var fieldParts = orderby[i].split(".");
+				var fieldParts = orderby[i].split("#");
 				var field = fieldParts[0];
 				var order = (fieldParts.length == 2) ? fieldParts[1] : "asc";
 				var orderparts = order.match(/(asc|desc)([a-z0-9_]*)?/i);
