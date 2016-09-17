@@ -23,12 +23,14 @@ Example:  "select label,user.name,menu_order from data where (user.name=='Bob') 
 
 		query: function(sql,json){
 			var returnfields = sql.match(/^(select)\s+([a-z0-9_#\.\,\*\']+)\s+from\s+([a-z0-9_\.]+)(?: where\s+\((.+)\))?\s*(?:order\sby\s+([a-z0-9_#\,\.]+))?\s*(?:limit\s+([0-9_\,]*))?/i);
+
+			let whitespace = /\s+/g;
 			var ops = {
-				fields: returnfields[2].replace(' ','').split(','),
-				from: returnfields[3].replace(' ',''),
+				fields: returnfields[2].replace(whitespace,'').split(','),
+				from: returnfields[3].replace(whitespace,''),
 				where: (returnfields[4] == undefined)? "true":returnfields[4],
-				orderby: (returnfields[5] == undefined)? []:returnfields[5].replace(' ','').split(','),
-				limit: (returnfields[6] == undefined)? []:returnfields[6].replace(' ','').split(','),
+				orderby: (returnfields[5] == undefined)? []:returnfields[5].replace(whitespace,'').split(','),
+				limit: (returnfields[6] == undefined)? []:returnfields[6].replace(whitespace,'').split(','),
 				fieldsAs: {}
 			};
 
